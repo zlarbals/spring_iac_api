@@ -6,6 +6,7 @@ import com.example.spring_iac_api.dto.MemberResponseDto;
 import com.example.spring_iac_api.dto.SignUpRequestDto;
 import com.example.spring_iac_api.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,16 +16,15 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Transactional
     public MemberResponseDto signUp(SignUpRequestDto signUpRequestDto) {
-
         Member member = Member.builder()
                 .email(signUpRequestDto.getEmail())
-                .password(signUpRequestDto.getPassword())
+                .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
                 .useYn(UseStatus.Y)
                 .build();
-
-        //TODO 패스워드 암호화
 
         Member newMember = memberRepository.save(member);
 
