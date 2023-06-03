@@ -1,5 +1,5 @@
 package com.example.spring_iac_api.domain;
 
-public enum UseStatus {
+public enum UseStatusYn {
     Y,N
 }

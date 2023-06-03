@@ -1,7 +1,7 @@
 package com.example.spring_iac_api.service;
 
 import com.example.spring_iac_api.domain.Member;
-import com.example.spring_iac_api.domain.UseStatus;
+import com.example.spring_iac_api.domain.UseStatusYn;
 import com.example.spring_iac_api.dto.MemberResponseDto;
 import com.example.spring_iac_api.dto.SignUpRequestDto;
 import com.example.spring_iac_api.exception.MemberDuplicateException;
@@ -28,7 +28,7 @@ public class MemberService {
         Member member = Member.builder()
                 .email(signUpRequestDto.getEmail())
                 .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
-                .useYn(UseStatus.Y)
+                .useYn(UseStatusYn.Y)
                 .build();
 
         Member newMember = memberRepository.save(member);

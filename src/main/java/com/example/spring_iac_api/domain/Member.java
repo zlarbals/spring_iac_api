@@ -26,7 +26,7 @@ public class Member extends BaseTimeEntity{
 
     @Column(name = "USE_YN")
     @Enumerated(EnumType.STRING)
-    private UseStatus useYn;
+    private UseStatusYn useYn;
 
     @Column(name = "DISABLED_DATE")
     private LocalDate disabledDate;
