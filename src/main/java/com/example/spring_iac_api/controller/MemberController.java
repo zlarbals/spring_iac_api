@@ -2,7 +2,7 @@ package com.example.spring_iac_api.controller;
 
 import com.example.spring_iac_api.dto.MemberResponseDto;
 import com.example.spring_iac_api.dto.ResponseResult;
-import com.example.spring_iac_api.dto.SignUpRequestDto;
+import com.example.spring_iac_api.dto.MemberRequestDto;
 import com.example.spring_iac_api.service.MemberService;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/member")
 @RequiredArgsConstructor
 @Slf4j
 public class MemberController {
@@ -25,16 +25,23 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ResponseResult> signUp(@Validated @RequestBody SignUpRequestDto signUpRequestDto, Errors errors){
+    public ResponseEntity<ResponseResult> signUp(@Validated @RequestBody MemberRequestDto memberRequestDto, Errors errors){
 
         if(errors.hasErrors()){
             log.error("sign up error : {}",errors);
             throw new IllegalArgumentException(PromisedReturnMessage.WRONG_FORMAT);
         }
 
-        MemberResponseDto memberResponseDto = memberService.signUp(signUpRequestDto);
+        MemberResponseDto memberResponseDto = memberService.signUp(memberRequestDto);
 
         return new ResponseEntity<>(new ResponseResult(HttpStatus.CREATED,memberResponseDto),HttpStatus.CREATED);
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<ResponseResult> signIn(@RequestBody MemberRequestDto memberRequestDto){
+        MemberResponseDto memberResponseDto = memberService.signIn(memberRequestDto);
+
+        return new ResponseEntity<>(new ResponseResult(HttpStatus.OK,memberResponseDto), HttpStatus.CREATED);
     }
 
 }

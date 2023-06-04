@@ -12,9 +12,20 @@ public class MemberResponseDto {
 
     private LocalDate createdDate;
 
+    private String accessToken;
+
+    private String refreshToken;
+
     public MemberResponseDto(Member member){
         this.email = member.getEmail();
         this.createdDate = member.getCreatedDate();
+    }
+
+    public MemberResponseDto(Member member, String accessToken, String refreshToken){
+        this.email = member.getEmail();
+        this.createdDate = member.getCreatedDate();
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
 }
