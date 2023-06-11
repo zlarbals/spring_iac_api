@@ -96,8 +96,8 @@ class MemberControllerTest {
         //then
         resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.email").value(signInEmail))
-                .andExpect(jsonPath("$.response.accessToken").exists())
-                .andExpect(jsonPath("$.response.refreshToken").exists());
+                .andExpect(jsonPath("$.response.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.response.refreshToken").isNotEmpty());
     }
 
     @DisplayName("로그인 테스트 - 회원가입 안한 사용자")
