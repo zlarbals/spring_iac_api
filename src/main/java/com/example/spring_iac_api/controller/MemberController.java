@@ -41,7 +41,7 @@ public class MemberController {
     public ResponseEntity<ResponseResult> signIn(@RequestBody MemberRequestDto memberRequestDto){
         MemberResponseDto memberResponseDto = memberService.signIn(memberRequestDto);
 
-        return new ResponseEntity<>(new ResponseResult(HttpStatus.OK,memberResponseDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(new ResponseResult(HttpStatus.OK,memberResponseDto), HttpStatus.OK);
     }
 
 }
