@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -25,6 +26,28 @@ class MemberControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @DisplayName("회원가입 테스트 - 정상 회원가입")
+    @Test
+    public void testMemberSignUp() throws Exception {
+        //case
+        String email = "1234@gmail.com";
+        String password = "12345678";
+        MemberRequestDto memberRequestDto = new MemberRequestDto(email,password);
+        String memberRequestDtoToJson = objectMapper.writeValueAsString(memberRequestDto);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(post("/member/signup")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(memberRequestDtoToJson))
+                .andDo(print());
+
+        //then
+        resultActions.andExpect(status().isCreated())
+                .andExpect(jsonPath("$.response.email").value(email))
+                .andExpect(jsonPath("$.response.accessToken").isEmpty())
+                .andExpect(jsonPath("$.response.refreshToken").isEmpty());
+    }
 
     @DisplayName("회원가입 테스트 - dto 이메일 유효성 검사")
     @Test
