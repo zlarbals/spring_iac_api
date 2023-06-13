@@ -2,3 +2,6 @@ jwt:
   secret-key:
     access-token: cdad1199-e4cd-4429-a9cd-c04cacc89156
     refresh-token: c9ba7d53-6880-4cfb-a386-3fabd5b1f040
+
+header:
+  auth-key: cad850b2-03bf-4bd0-b7dd-af35563cb24a
