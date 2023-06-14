@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -59,5 +62,25 @@ public class MemberService {
         String refreshToken= jwtTokenProvider.generateRefreshToken(member.getEmail());
 
         return new MemberResponseDto(member,accessToken,refreshToken);
+    }
+
+    public MemberResponseDto refreshToken(String accessToken, String refreshToken) {
+        boolean isRefreshTokenValid = jwtTokenProvider.validateRefreshToken(refreshToken);
+        boolean isAccessTokenValid = jwtTokenProvider.validateAccessToken(accessToken);
+
+
+        String memberEmail = jwtTokenProvider.getMemberEmail(accessToken, refreshToken);
+        Optional<Member> optionalMember = memberRepository.findMemberByEmail(memberEmail);
+        if(ObjectUtils.isEmpty(memberEmail) || optionalMember.isEmpty()){
+            return new MemberResponseDto();
+        }
+
+        Member member = optionalMember.get();
+        if(!isAccessTokenValid && isRefreshTokenValid){
+            String newAccessToken = jwtTokenProvider.generateAccessToken(memberEmail);
+            return new MemberResponseDto(member,newAccessToken,refreshToken);
+        }else{
+            return new MemberResponseDto();
+        }
     }
 }

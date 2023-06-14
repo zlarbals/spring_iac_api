@@ -44,4 +44,11 @@ public class MemberController {
         return new ResponseEntity<>(new ResponseResult(HttpStatus.OK,memberResponseDto), HttpStatus.OK);
     }
 
+    @PostMapping("/token/refresh")
+    public ResponseEntity<ResponseResult> refreshToken(@RequestBody String accessToken, @RequestBody String refreshToken){
+        MemberResponseDto memberResponseDto = memberService.refreshToken(accessToken, refreshToken);
+
+        return new ResponseEntity<>(new ResponseResult(HttpStatus.CREATED,memberResponseDto), HttpStatus.CREATED);
+    }
+
 }

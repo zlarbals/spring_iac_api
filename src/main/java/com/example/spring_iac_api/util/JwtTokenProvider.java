@@ -1,14 +1,13 @@
 package com.example.spring_iac_api.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -45,6 +44,34 @@ public class JwtTokenProvider {
                 .setExpiration(Date.from(expireTime.atZone(ZoneId.systemDefault()).toInstant()))
                 .signWith(secretKey,SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public boolean validateAccessToken(String accessToken){
+        SecretKey secretKey = Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        return validateToken(accessToken,secretKey);
+    }
+
+    public boolean validateRefreshToken(String refreshToken){
+        SecretKey secretKey = Keys.hmacShaKeyFor(REFRESH_TOKEN_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        return validateToken(refreshToken,secretKey);
+    }
+    private boolean validateToken(String token, Key key){
+        Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        return !claims.getBody().getExpiration().before(new Date());
+    }
+
+    public String getMemberEmail(String accessToken, String refreshToken) {
+        SecretKey accessTokenSecretKey = Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        SecretKey refreshTokenSecretKey = Keys.hmacShaKeyFor(REFRESH_TOKEN_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+
+        String accessTokenEmail = Jwts.parserBuilder().setSigningKey(accessTokenSecretKey).build().parseClaimsJws(accessToken).getBody().getSubject();
+        String refreshTokenEmail = Jwts.parserBuilder().setSigningKey(refreshTokenSecretKey).build().parseClaimsJws(refreshToken).getBody().getSubject();
+
+        if(accessTokenEmail.equals(refreshTokenEmail)){
+            return accessTokenEmail;
+        }else{
+            return "";
+        }
     }
 
 }
