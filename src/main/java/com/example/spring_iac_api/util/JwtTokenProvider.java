@@ -22,8 +22,8 @@ public class JwtTokenProvider {
     @Value("${jwt.secret-key.refresh-token}")
     private String REFRESH_TOKEN_SECRET_KEY;
 
-    private final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60; // 15 minutes
-    private final long REFRESH_TOKEN_EXPIRATION_TIME = 60 * 60; // 60 minutes
+    private final long ACCESS_TOKEN_EXPIRATION_TIME = 1000L * 60 * 15; // 15 minutes
+    private final long REFRESH_TOKEN_EXPIRATION_TIME = 1000L * 60 * 60; // 60 minutes
 
     public String generateAccessToken(String email){
         return generateToken(email,ACCESS_TOKEN_SECRET_KEY,ACCESS_TOKEN_EXPIRATION_TIME);
@@ -36,13 +36,13 @@ public class JwtTokenProvider {
     private String generateToken(String email, String tokenSecretKey, long expirationTime){
         SecretKey secretKey = Keys.hmacShaKeyFor(tokenSecretKey.getBytes(StandardCharsets.UTF_8));
         Claims claims = Jwts.claims().setSubject(email);
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expireTime = now.plusSeconds(expirationTime);
+        Date now = new Date();
+        Date expireTime = new Date(now.getTime()+expirationTime);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuedAt(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()))
-                .setExpiration(Date.from(expireTime.atZone(ZoneId.systemDefault()).toInstant()))
+                .setIssuedAt(now)
+                .setExpiration(expireTime)
                 .signWith(secretKey,SignatureAlgorithm.HS256)
                 .compact();
     }
