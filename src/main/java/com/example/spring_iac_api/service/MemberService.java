@@ -65,8 +65,8 @@ public class MemberService {
     }
 
     public MemberResponseDto refreshToken(String accessToken, String refreshToken) {
-        boolean isRefreshTokenValid = jwtTokenProvider.validateRefreshToken(refreshToken);
         boolean isAccessTokenValid = jwtTokenProvider.validateAccessToken(accessToken);
+        boolean isRefreshTokenValid = jwtTokenProvider.validateRefreshToken(refreshToken);
 
 
         String memberEmail = jwtTokenProvider.getMemberEmail(accessToken, refreshToken);
@@ -76,7 +76,10 @@ public class MemberService {
         }
 
         Member member = optionalMember.get();
-        if(!isAccessTokenValid && isRefreshTokenValid){
+
+        if(isAccessTokenValid && isRefreshTokenValid){
+          return new MemberResponseDto(member,accessToken,refreshToken);
+        } else if(!isAccessTokenValid && isRefreshTokenValid){
             String newAccessToken = jwtTokenProvider.generateAccessToken(memberEmail);
             return new MemberResponseDto(member,newAccessToken,refreshToken);
         }else{
