@@ -9,12 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/member")
@@ -44,11 +42,24 @@ public class MemberController {
         return new ResponseEntity<>(new ResponseResult(HttpStatus.OK,memberResponseDto), HttpStatus.OK);
     }
 
-    @PostMapping("/token/refresh")
-    public ResponseEntity<ResponseResult> refreshToken(@RequestBody String accessToken, @RequestBody String refreshToken){
-        MemberResponseDto memberResponseDto = memberService.refreshToken(accessToken, refreshToken);
+    @GetMapping("/refresh")
+    public ResponseEntity<ResponseResult> refreshToken(@RequestHeader("Authorization") String bearerRefreshToken, @RequestParam("email") String email){
+        String refreshToken = extractTokenFromHeader(bearerRefreshToken);
+        MemberResponseDto memberResponseDto = memberService.refreshToken(email, refreshToken);
 
-        return new ResponseEntity<>(new ResponseResult(HttpStatus.CREATED,memberResponseDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(new ResponseResult(HttpStatus.OK,memberResponseDto), HttpStatus.OK);
+    }
+
+    private String extractTokenFromHeader(String bearerRefreshToken) {
+        if(!ObjectUtils.isEmpty(bearerRefreshToken)){
+            String[] stringList = bearerRefreshToken.split(" ");
+
+            if(stringList.length == 2 && stringList[0].equals("Bearer")){
+                return stringList[1];
+            }
+        }
+
+        return null;
     }
 
 }

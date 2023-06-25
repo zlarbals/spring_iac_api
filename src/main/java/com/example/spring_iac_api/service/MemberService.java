@@ -5,6 +5,7 @@ import com.example.spring_iac_api.domain.UseStatusYn;
 import com.example.spring_iac_api.dto.MemberResponseDto;
 import com.example.spring_iac_api.dto.MemberRequestDto;
 import com.example.spring_iac_api.exception.MemberDuplicateException;
+import com.example.spring_iac_api.exception.TokenValidationException;
 import com.example.spring_iac_api.repository.MemberRepository;
 import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
@@ -63,27 +64,21 @@ public class MemberService {
         return new MemberResponseDto(member,accessToken,refreshToken);
     }
 
-    public MemberResponseDto refreshToken(String accessToken, String refreshToken) {
+    public MemberResponseDto refreshToken(String email, String refreshToken) {
         JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
-        boolean isAccessTokenValid = jwtTokenProvider.validateAccessToken(accessToken);
         boolean isRefreshTokenValid = jwtTokenProvider.validateRefreshToken(refreshToken);
+        if(!isRefreshTokenValid){
+            throw new TokenValidationException(PromisedReturnMessage.TOKEN_NOT_VALIDATION);
+        }
 
-
-        String memberEmail = jwtTokenProvider.getMemberEmail(accessToken, refreshToken);
+        String memberEmail = jwtTokenProvider.getMemberEmail(email, refreshToken);
         Optional<Member> optionalMember = memberRepository.findMemberByEmail(memberEmail);
         if(ObjectUtils.isEmpty(memberEmail) || optionalMember.isEmpty()){
-            return new MemberResponseDto();
+            throw new TokenValidationException(PromisedReturnMessage.TOKEN_NOT_VALIDATION);
         }
 
         Member member = optionalMember.get();
-
-        if(isAccessTokenValid && isRefreshTokenValid){
-          return new MemberResponseDto(member,accessToken,refreshToken);
-        } else if(!isAccessTokenValid && isRefreshTokenValid){
-            String newAccessToken = jwtTokenProvider.generateAccessToken(memberEmail);
-            return new MemberResponseDto(member,newAccessToken,refreshToken);
-        }else{
-            return new MemberResponseDto();
-        }
+        String newAccessToken = jwtTokenProvider.generateAccessToken(memberEmail);
+        return new MemberResponseDto(member, newAccessToken,refreshToken);
     }
 }
