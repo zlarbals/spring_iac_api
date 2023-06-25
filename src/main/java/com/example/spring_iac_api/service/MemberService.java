@@ -6,7 +6,7 @@ import com.example.spring_iac_api.dto.MemberResponseDto;
 import com.example.spring_iac_api.dto.MemberRequestDto;
 import com.example.spring_iac_api.exception.MemberDuplicateException;
 import com.example.spring_iac_api.repository.MemberRepository;
-import com.example.spring_iac_api.util.JwtTokenProvider;
+import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,8 +23,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     private final PasswordEncoder passwordEncoder;
-
-    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public MemberResponseDto signUp(MemberRequestDto memberRequestDto) {
@@ -58,6 +56,7 @@ public class MemberService {
             throw new IllegalArgumentException(PromisedReturnMessage.FAIL_LOGIN);
         }
 
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
         String accessToken= jwtTokenProvider.generateAccessToken(member.getEmail());
         String refreshToken= jwtTokenProvider.generateRefreshToken(member.getEmail());
 
@@ -65,6 +64,7 @@ public class MemberService {
     }
 
     public MemberResponseDto refreshToken(String accessToken, String refreshToken) {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
         boolean isAccessTokenValid = jwtTokenProvider.validateAccessToken(accessToken);
         boolean isRefreshTokenValid = jwtTokenProvider.validateRefreshToken(refreshToken);
 
