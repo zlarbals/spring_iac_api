@@ -3,6 +3,7 @@ package com.example.spring_iac_api.controller;
 import com.example.spring_iac_api.dto.MemberRequestDto;
 import com.example.spring_iac_api.service.MemberService;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
+import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -168,5 +170,85 @@ class MemberControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorMessage").value(PromisedReturnMessage.FAIL_LOGIN));
+    }
+
+    @DisplayName("토큰 리프레시 테스트 - 정상 조건")
+    @Test
+    public void testTokenRefresh() throws Exception{
+        //case
+        String signUpEmail = "1234@gmail.com";
+        String signUpPassword = "12345678";
+        memberService.signUp(new MemberRequestDto(signUpEmail,signUpPassword));
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        String refreshToken = jwtTokenProvider.generateRefreshToken(signUpEmail);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/member/refresh")
+                    .header("Authorization", "Bearer " + refreshToken)
+                    .param("email", signUpEmail))
+                .andDo(print());
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.response.refreshToken").value(refreshToken))
+                .andExpect(jsonPath("$.response.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.response.email").value(signUpEmail));
+    }
+
+    @DisplayName("토큰 리프레시 테스트 - Authorization header 미입력")
+    @Test
+    public void testTokenRefreshNoAuthorizationHeader() throws Exception{
+        //case
+        String signUpEmail = "1234@gmail.com";
+        String signUpPassword = "12345678";
+        memberService.signUp(new MemberRequestDto(signUpEmail,signUpPassword));
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/member/refresh")
+                        .param("email", signUpEmail))
+                .andDo(print());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("토큰 리프레시 테스트 - Authorization header Bearer prefix 미입력")
+    @Test
+    public void testTokenRefreshAuthorizationHeaderNoPrefixBearer() throws Exception{
+        //case
+        String signUpEmail = "1234@gmail.com";
+        String signUpPassword = "12345678";
+        memberService.signUp(new MemberRequestDto(signUpEmail,signUpPassword));
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        String refreshToken = jwtTokenProvider.generateRefreshToken(signUpEmail);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/member/refresh")
+                        .header("Authorization", refreshToken)
+                        .param("email", signUpEmail))
+                .andDo(print());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("토큰 리프레시 테스트 - Authorization header 리프레시 토큰과 Bearer사이 공백 미입력")
+    @Test
+    public void testTokenRefreshAuthorizationHeaderNoBlankBetweenRefreshTokenAndBearer() throws Exception{
+        //case
+        String signUpEmail = "1234@gmail.com";
+        String signUpPassword = "12345678";
+        memberService.signUp(new MemberRequestDto(signUpEmail,signUpPassword));
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        String refreshToken = jwtTokenProvider.generateRefreshToken(signUpEmail);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/member/refresh")
+                        .header("Authorization", "Bearer" + refreshToken)
+                        .param("email", signUpEmail))
+                .andDo(print());
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
     }
 }

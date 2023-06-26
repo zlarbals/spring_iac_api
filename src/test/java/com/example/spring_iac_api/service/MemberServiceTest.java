@@ -4,7 +4,11 @@ import com.example.spring_iac_api.domain.Member;
 import com.example.spring_iac_api.dto.MemberRequestDto;
 import com.example.spring_iac_api.dto.MemberResponseDto;
 import com.example.spring_iac_api.exception.MemberDuplicateException;
+import com.example.spring_iac_api.exception.TokenValidationException;
 import com.example.spring_iac_api.repository.MemberRepository;
+import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
+import com.example.spring_iac_api.util.time.TestTimeProvider;
+import com.example.spring_iac_api.util.time.TimeProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,8 @@ class MemberServiceTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    private final int REFRESH_TOKEN_EXPIRATION_MINUTES = 60;
 
     @DisplayName("회원가입 테스트 - 정상입력")
     @Test
@@ -125,7 +131,57 @@ class MemberServiceTest {
         assertThrows(IllegalArgumentException.class, () -> memberService.signIn(new MemberRequestDto(signInEmail, signInPassword)));
     }
 
+    @DisplayName("토큰 리프레시 테스트 - email,RefreshToken 정상")
+    @Test
+    public void testTokenRefresh(){
+        //case
+        String signUpEmail = "1234@gmail.com";
+        String signUpPassword = "12345678";
+        memberService.signUp(new MemberRequestDto(signUpEmail,signUpPassword));
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        String refreshToken = jwtTokenProvider.generateRefreshToken(signUpEmail);
 
+        //when
+        MemberResponseDto result = memberService.refreshToken(signUpEmail, refreshToken);
 
+        //then
+        assertEquals(signUpEmail,result.getEmail());
+        assertNotNull(result.getAccessToken());
+        assertEquals(refreshToken,result.getRefreshToken());
+    }
+
+    @DisplayName("토큰 리프레시 테스트 - email 정상, RT 만료")
+    @Test
+    public void testTokenRefreshWithValidEmailAndExpiredRefreshToken(){
+        //case
+        String signUpEmail = "1234@gmail.com";
+        String signUpPassword = "12345678";
+        memberService.signUp(new MemberRequestDto(signUpEmail,signUpPassword));
+
+        TimeProvider timeProvider = new TestTimeProvider(REFRESH_TOKEN_EXPIRATION_MINUTES);
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(timeProvider);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(signUpEmail);
+
+        //when
+        //then
+        assertThrows(TokenValidationException.class, () -> memberService.refreshToken(signUpEmail,refreshToken));
+    }
+
+    @DisplayName("토큰 리프레시 테스트 - payload와 다른 email , RT 정상")
+    @Test
+    public void testTokenRefreshWithInvalidEmailAndValidRt(){
+        //case
+        String signUpEmail = "1234@gmail.com";
+        String signUpPassword = "12345678";
+        String invalidEmail = "12345@gmail.com";
+        memberService.signUp(new MemberRequestDto(signUpEmail,signUpPassword));
+
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        String refreshToken = jwtTokenProvider.generateRefreshToken(signUpEmail);
+
+        //when
+        //then
+        assertThrows(TokenValidationException.class, () -> memberService.refreshToken(invalidEmail,refreshToken));
+    }
 
 }

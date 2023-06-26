@@ -8,4 +8,5 @@ public class PromisedReturnMessage {
     public static final String FAIL_LOGIN = "로그인에 실패하였습니다.";
 
     public static final String INVALID_AUTH_KEY = "서비스 접근 권한이 없습니다.";
+    public static final String TOKEN_NOT_VALIDATION = "재로그인이 필요합니다.";
 }

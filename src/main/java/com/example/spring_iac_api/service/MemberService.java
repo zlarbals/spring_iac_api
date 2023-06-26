@@ -5,13 +5,17 @@ import com.example.spring_iac_api.domain.UseStatusYn;
 import com.example.spring_iac_api.dto.MemberResponseDto;
 import com.example.spring_iac_api.dto.MemberRequestDto;
 import com.example.spring_iac_api.exception.MemberDuplicateException;
+import com.example.spring_iac_api.exception.TokenValidationException;
 import com.example.spring_iac_api.repository.MemberRepository;
-import com.example.spring_iac_api.util.JwtTokenProvider;
+import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +24,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     private final PasswordEncoder passwordEncoder;
-
-    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public MemberResponseDto signUp(MemberRequestDto memberRequestDto) {
@@ -55,9 +57,28 @@ public class MemberService {
             throw new IllegalArgumentException(PromisedReturnMessage.FAIL_LOGIN);
         }
 
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
         String accessToken= jwtTokenProvider.generateAccessToken(member.getEmail());
         String refreshToken= jwtTokenProvider.generateRefreshToken(member.getEmail());
 
         return new MemberResponseDto(member,accessToken,refreshToken);
+    }
+
+    public MemberResponseDto refreshToken(String email, String refreshToken) {
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        boolean isRefreshTokenValid = jwtTokenProvider.validateRefreshToken(refreshToken);
+        if(!isRefreshTokenValid){
+            throw new TokenValidationException(PromisedReturnMessage.TOKEN_NOT_VALIDATION);
+        }
+
+        String memberEmail = jwtTokenProvider.getMemberEmail(email, refreshToken);
+        Optional<Member> optionalMember = memberRepository.findMemberByEmail(memberEmail);
+        if(ObjectUtils.isEmpty(memberEmail) || optionalMember.isEmpty()){
+            throw new TokenValidationException(PromisedReturnMessage.TOKEN_NOT_VALIDATION);
+        }
+
+        Member member = optionalMember.get();
+        String newAccessToken = jwtTokenProvider.generateAccessToken(memberEmail);
+        return new MemberResponseDto(member, newAccessToken,refreshToken);
     }
 }

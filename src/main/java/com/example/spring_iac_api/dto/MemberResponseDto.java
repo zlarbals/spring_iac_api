@@ -2,10 +2,12 @@ package com.example.spring_iac_api.dto;
 
 import com.example.spring_iac_api.domain.Member;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Getter
+@NoArgsConstructor
 public class MemberResponseDto {
 
     private String email;
