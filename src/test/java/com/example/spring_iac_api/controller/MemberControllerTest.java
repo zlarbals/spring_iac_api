@@ -47,6 +47,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signup")
+                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -70,6 +71,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signup")
+                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -90,6 +92,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signup")
+                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -113,6 +116,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signin")
+                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -139,6 +143,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signin")
+                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -163,6 +168,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signin")
+                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -184,6 +190,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/member/refresh")
+                    .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                     .header("Authorization", "Bearer " + refreshToken)
                     .param("email", signUpEmail))
                 .andDo(print());
@@ -205,6 +212,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/member/refresh")
+                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .param("email", signUpEmail))
                 .andDo(print());
 
@@ -224,6 +232,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/member/refresh")
+                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .header("Authorization", refreshToken)
                         .param("email", signUpEmail))
                 .andDo(print());
@@ -244,6 +253,7 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/member/refresh")
+                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .header("Authorization", "Bearer" + refreshToken)
                         .param("email", signUpEmail))
                 .andDo(print());
