@@ -1,6 +1,7 @@
 package com.example.spring_iac_api.controller;
 
 import com.example.spring_iac_api.dto.MemberRequestDto;
+import com.example.spring_iac_api.exception.AuthKeyInvalidException;
 import com.example.spring_iac_api.service.MemberService;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
 import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.NestedServletException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -261,4 +263,30 @@ class MemberControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest());
     }
+
+    @DisplayName("AuthKey 인터셉터 테스트 - AuthKey header 미입력")
+    @Test
+    public void testAuthKeyInterceptorNoAuthKeyHeader() throws Exception{
+        try {
+            mockMvc.perform(get("/test"));
+        }catch (NestedServletException e){
+            Throwable rootCause = e.getRootCause();
+            assertEquals(PromisedReturnMessage.INVALID_AUTH_KEY, rootCause.getMessage());
+        }
+    }
+
+    @DisplayName("AuthKey 인터셉터 테스트 - 잘못된 AuthKey header 입력")
+    @Test
+    public void testAuthKeyInterceptorInvalidAuthKeyHeader() throws Exception{
+        try {
+            mockMvc.perform(get("/test")
+                    .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982-INVALID")
+            );
+        }catch (NestedServletException e){
+            Throwable rootCause = e.getRootCause();
+            assertEquals(PromisedReturnMessage.INVALID_AUTH_KEY, rootCause.getMessage());
+        }
+    }
+
+
 }
