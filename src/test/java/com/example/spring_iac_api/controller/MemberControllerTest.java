@@ -1,11 +1,13 @@
 package com.example.spring_iac_api.controller;
 
+import com.example.spring_iac_api.domain.Service;
 import com.example.spring_iac_api.dto.MemberRequestDto;
-import com.example.spring_iac_api.exception.AuthKeyInvalidException;
+import com.example.spring_iac_api.repository.ServiceRepository;
 import com.example.spring_iac_api.service.MemberService;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
 import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,15 @@ class MemberControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ServiceRepository serviceRepository;
+
+    @BeforeEach
+    void saveAuthKey(){
+        Service service = new Service("test","ee4e08b3-9b4a-4577-b891-c1399447d982");
+        serviceRepository.save(service);
+    }
 
     @DisplayName("회원가입 테스트 - 정상 회원가입")
     @Test
