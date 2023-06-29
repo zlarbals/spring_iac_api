@@ -1,8 +1,8 @@
 package com.example.spring_iac_api.interceptor;
 
-import com.example.spring_iac_api.domain.Service;
+import com.example.spring_iac_api.domain.Membership;
 import com.example.spring_iac_api.exception.AuthKeyInvalidException;
-import com.example.spring_iac_api.repository.ServiceRepository;
+import com.example.spring_iac_api.repository.MembershipRepository;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,19 +17,19 @@ import java.util.Optional;
 @Component
 public class HeaderAuthKeyInterceptor implements HandlerInterceptor {
 
-    private final ServiceRepository serviceKeyRepository;
+    private final MembershipRepository membershipRepository;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String requestAuthKey = request.getHeader("AuthKey");
 
-        Optional<Service> service = serviceKeyRepository.findServiceByKey(requestAuthKey);
+        Optional<Membership> membership = membershipRepository.findMembershipByKey(requestAuthKey);
 
-        if(ObjectUtils.isEmpty(requestAuthKey) || service.isEmpty()){
+        if(ObjectUtils.isEmpty(requestAuthKey) || membership.isEmpty()){
             throw new AuthKeyInvalidException(PromisedReturnMessage.INVALID_AUTH_KEY);
         }
 
-        request.setAttribute("service",service.get().getServiceName());
+        request.setAttribute("service",membership.get().getMembershipName());
         return true;
     }
 }
