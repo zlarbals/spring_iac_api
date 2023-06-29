@@ -4,6 +4,8 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "IAC_MEMBER")
@@ -30,5 +32,8 @@ public class Member extends BaseTimeEntity{
 
     @Column(name = "DISABLED_DATE")
     private LocalDate disabledDate;
+
+    @OneToMany(mappedBy = "member")
+    private List<MemberService> memberServiceList = new ArrayList<>();
 
 }
