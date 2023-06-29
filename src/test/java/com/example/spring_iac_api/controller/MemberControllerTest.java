@@ -1,8 +1,8 @@
 package com.example.spring_iac_api.controller;
 
-import com.example.spring_iac_api.domain.Service;
+import com.example.spring_iac_api.domain.Membership;
 import com.example.spring_iac_api.dto.MemberRequestDto;
-import com.example.spring_iac_api.repository.ServiceRepository;
+import com.example.spring_iac_api.repository.MembershipRepository;
 import com.example.spring_iac_api.service.MemberService;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
 import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
@@ -41,12 +41,12 @@ class MemberControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private ServiceRepository serviceRepository;
+    private MembershipRepository membershipRepository;
 
     @BeforeEach
     void saveAuthKey(){
-        Service service = new Service("test","ee4e08b3-9b4a-4577-b891-c1399447d982");
-        serviceRepository.save(service);
+        Membership service = new Membership("test","ee4e08b3-9b4a-4577-b891-c1399447d982");
+        membershipRepository.save(service);
     }
 
     @DisplayName("회원가입 테스트 - 정상 회원가입")

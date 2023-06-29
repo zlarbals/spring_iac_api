@@ -8,15 +8,15 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "IAC_MEMBER_SERVICE")
+@Table(name = "IAC_MEMBER_MEMBERSHIP_LINK")
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberService extends BaseTimeEntity{
+public class MemberMembershipLink extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MEMBER_SERVICE_SEQ")
+    @Column(name = "MEMBER_MEMBERSHIP_LINK_SEQ")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -24,7 +24,7 @@ public class MemberService extends BaseTimeEntity{
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SERVICE_NAME")
-    private Service service;
+    @JoinColumn(name = "MEMBERSHIP_NAME")
+    private Membership membership;
 
 }

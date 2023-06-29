@@ -11,16 +11,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "IAC_SERVICE")
+@Table(name = "IAC_MEMBERSHIP")
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Service extends BaseTimeEntity{
+public class Membership extends BaseTimeEntity{
 
     @Id
-    @Column(name = "SERVICE_NAME")
-    private String serviceName;
+    @Column(name = "MEMBERSHIP_NAME")
+    private String membershipName;
 
-    @Column(name = "SERVICE_KEY", unique = true)
+    @Column(name = "MEMBERSHIP_KEY", unique = true)
     private String key;
 }
