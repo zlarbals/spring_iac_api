@@ -4,6 +4,7 @@ import com.example.spring_iac_api.domain.Member;
 import com.example.spring_iac_api.domain.UseStatusYn;
 import com.example.spring_iac_api.dto.MemberResponseDto;
 import com.example.spring_iac_api.dto.MemberRequestDto;
+import com.example.spring_iac_api.dto.MemberSyncResponseDto;
 import com.example.spring_iac_api.exception.MemberDuplicateException;
 import com.example.spring_iac_api.exception.TokenValidationException;
 import com.example.spring_iac_api.repository.MemberRepository;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -80,5 +83,18 @@ public class MemberService {
         Member member = optionalMember.get();
         String newAccessToken = jwtTokenProvider.generateAccessToken(memberEmail);
         return new MemberResponseDto(member, newAccessToken,refreshToken);
+    }
+
+    public List<MemberSyncResponseDto> getAllMemberByServiceName(String serviceName) {
+        List<Member> memberListByServiceName = memberRepository.findMembersByMembershipList(serviceName);
+
+        List<MemberSyncResponseDto> memberSyncResponseDtoList = new ArrayList<>();
+        memberListByServiceName.forEach(member -> {
+            MemberSyncResponseDto memberSyncResponseDto = new MemberSyncResponseDto(member);
+            memberSyncResponseDtoList.add(memberSyncResponseDto);
+        });
+
+
+        return memberSyncResponseDtoList;
     }
 }
