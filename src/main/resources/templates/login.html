@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script>
+        function submitForm() {
+            var email = document.getElementById("email").value;
+            var password = document.getElementById("password").value;
+
+            var data = {
+                "email": email,
+                "password": password
+            };
+
+            fetch("/member/signin", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data)
+            }).then(response=> response.json())
+                .then(result => {
+                    sessionStorage.setItem('accessToken',result.response.accessToken);
+                    sessionStorage.setItem('refreshToken',result.response.refreshToken);
+
+                })
+            .catch(function(error) {
+                console.log(error);
+            });
+        }
+    </script>
+</head>
+<body>
+<h2>Login</h2>
+<form>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+    <br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+    <br>
+    <button type="button" onclick="submitForm()">Login</button>
+</form>
+</body>
+</html>
