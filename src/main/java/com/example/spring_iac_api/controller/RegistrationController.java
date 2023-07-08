@@ -10,7 +10,7 @@ public class RegistrationController {
 
     @GetMapping("/signin")
     public String showSignInForm(){
-        return "login";
+        return "signin";
     }
 
 }

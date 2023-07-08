@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SignIn</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #cde3f7;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            margin-top: 100px;
+            padding: 20px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            width: 100%;
+        }
+
+        .btn-success {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .text-danger {
+            color: #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h2>로그인</h2>
+    <form>
+        <div class="form-group">
+            <label for="email">이메일:</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="password">비밀번호:</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+        </div>
+        <div id="error-message" class="text-danger mt-2"></div>
+        <button type="button" class="btn btn-primary" onclick="submitForm()">로그인</button>
+        <a href="/form/signup" class="btn btn-success">회원가입</a>
+    </form>
+</div>
+
+<!-- Add Bootstrap JS (optional if you need any JavaScript features from Bootstrap) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function submitForm() {
+        var email = document.getElementById("email").value;
+        var password = document.getElementById("password").value;
+
+        var data = {
+            "email": email,
+            "password": password
+        };
+
+        fetch("/member/signin", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        }).then(response => {
+            var json = response.json();
+            if (response.ok) {
+                return json
+            } else {
+                throw json;
+            }
+        })
+            .then(result => {
+                sessionStorage.setItem('accessToken', result.response.accessToken);
+                sessionStorage.setItem('refreshToken', result.response.refreshToken);
+            })
+            .catch(error => {
+                error.then(errorBody => {
+                    document.getElementById("error-message").innerText = errorBody.errorMessage;
+                })
+            });
+    }
+</script>
+</body>
+
+</html>
