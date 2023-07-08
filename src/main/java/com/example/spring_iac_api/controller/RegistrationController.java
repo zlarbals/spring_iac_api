@@ -13,4 +13,9 @@ public class RegistrationController {
         return "signin";
     }
 
+    @GetMapping("/signup")
+    public String showSignUpForm() {
+        return "signup";
+    }
+
 }

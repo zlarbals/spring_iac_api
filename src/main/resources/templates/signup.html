@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <!-- Bootstrap CSS 추가 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0fff0;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            margin-top: 100px;
+            padding: 20px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .btn-success {
+            width: 100%;
+        }
+
+        .btn-primary {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .text-danger {
+            color: #dc3545;
+        }
+
+        .text-success{
+            color: blue;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h2>회원가입</h2>
+    <form>
+        <!--<div class="form-group">-->
+        <!--<label for="name">이름:</label>-->
+        <!--<input type="text" id="name" name="name" class="form-control" required>-->
+        <!--</div>-->
+        <div class="form-group">
+            <label for="email">이메일:</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="password">비밀번호:</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="confirm-password">비밀번호 확인:</label>
+            <input type="password" id="confirm-password" name="confirm-password" class="form-control" required>
+        </div>
+        <div id="success-message" class="text-success mt-2"></div>
+        <div id="error-message" class="text-danger mt-2"></div>
+        <button type="button" class="btn btn-success" onclick="submitForm()">가입하기</button>
+        <a href="/form/signin" class="btn btn-primary">로그인 페이지로 돌아가기</a>
+    </form>
+</div>
+
+<!-- Bootstrap JS 추가 (만약 Bootstrap의 JavaScript 기능을 사용하려면 선택적으로 추가해 주세요) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function submitForm() {
+        // var name = document.getElementById("name").value;
+        var email = document.getElementById("email").value;
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirm-password").value;
+
+        // 필요한 경우 유효성 검사 수행
+        if (password !== confirmPassword) {
+            document.getElementById("error-message").innerText = "비밀번호가 일치하지 않습니다."
+            return;
+        }
+
+        var data = {
+            // "name": name,
+            "email": email,
+            "password": password
+        };
+
+        fetch("/member/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        }).then(response => {
+            var json = response.json();
+            if(response.ok){
+                return json;
+            }else{
+                throw json;
+            }
+        })
+            .then(result => {
+                document.getElementById("email").value = ""; // 이메일 칸 비우기
+                document.getElementById("password").value = ""; // 패스워드 칸 비우기
+                document.getElementById("confirm-password").value = ""; // 비밀번호 확인 칸 비우기
+                document.getElementById("error-message").innerText = ""; // 에러 메시지 지우기
+                document.getElementById("success-message").innerText = "회원가입이 성공적으로 완료되었습니다. \n 로그인 하세요."; // 성공 메시지 표시
+
+            })
+            .catch(error => {
+                error.then(errorBody => {
+                    document.getElementById("error-message").innerText = errorBody.errorMessage;
+                })
+            })
+    }
+</script>
+</body>
+
+</html>
