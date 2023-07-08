@@ -1,11 +1,16 @@
 package com.example.spring_iac_api.service;
 
 import com.example.spring_iac_api.domain.Member;
+import com.example.spring_iac_api.domain.MemberMembershipLink;
+import com.example.spring_iac_api.domain.Membership;
 import com.example.spring_iac_api.dto.MemberRequestDto;
 import com.example.spring_iac_api.dto.MemberResponseDto;
+import com.example.spring_iac_api.dto.MemberSyncResponseDto;
 import com.example.spring_iac_api.exception.MemberDuplicateException;
 import com.example.spring_iac_api.exception.TokenValidationException;
+import com.example.spring_iac_api.repository.MemberMembershipLinkRepository;
 import com.example.spring_iac_api.repository.MemberRepository;
+import com.example.spring_iac_api.repository.MembershipRepository;
 import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
 import com.example.spring_iac_api.util.time.TestTimeProvider;
 import com.example.spring_iac_api.util.time.TimeProvider;
@@ -14,12 +19,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("local")
 class MemberServiceTest {
 
     @Autowired
@@ -30,6 +39,12 @@ class MemberServiceTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private MembershipRepository membershipRepository;
+
+    @Autowired
+    private MemberMembershipLinkRepository memberMembershipLinkRepository;
 
     private final int REFRESH_TOKEN_EXPIRATION_MINUTES = 60;
 
@@ -182,6 +197,71 @@ class MemberServiceTest {
         //when
         //then
         assertThrows(TokenValidationException.class, () -> memberService.refreshToken(invalidEmail,refreshToken));
+    }
+
+    @DisplayName("회원 동기화 테스트")
+    @Test
+    public void testSyncMember(){
+        //case
+        //Member 추가
+        String signUpEmail1 = "12@gmail.com";
+        String signUpPassword1 = "12345678";
+        memberService.signUp(new MemberRequestDto(signUpEmail1,signUpPassword1));
+        Member member1 = memberRepository.findMemberByEmail(signUpEmail1).get();
+
+        String signUpEmail2 = "34@gmail.com";
+        String signUpPassword2 = "12345678";
+        memberService.signUp(new MemberRequestDto(signUpEmail2,signUpPassword2));
+        Member member2 = memberRepository.findMemberByEmail(signUpEmail2).get();
+
+        //Membership 추가
+        String serviceName1 = "test1";
+        Membership membership1 = new Membership(serviceName1,"test1");
+        Membership savedMembership1 = membershipRepository.save(membership1);
+
+        String serviceName2 = "test2";
+        Membership membership2 = new Membership(serviceName2,"test2");
+        Membership savedMembership2 = membershipRepository.save(membership2);
+
+        //MemberMembershipLink 추가
+        MemberMembershipLink memberMembershipLink1 = new MemberMembershipLink(null,member1,savedMembership1);
+        memberMembershipLinkRepository.save(memberMembershipLink1);
+
+        MemberMembershipLink memberMembershipLink2 = new MemberMembershipLink(null,member2,savedMembership2);
+        memberMembershipLinkRepository.save(memberMembershipLink2);
+
+        //when
+        List<MemberSyncResponseDto> allMemberByServiceName = memberService.getAllMemberByServiceName(serviceName1);
+
+        //then
+        assertEquals(1,allMemberByServiceName.size());
+        assertEquals(signUpEmail1,allMemberByServiceName.get(0).getEmail());
+    }
+
+    @DisplayName("회원 동기화 테스트 - 없는 서비스 이름으로 조회")
+    @Test
+    public void testSyncMemberWithSearchInvalidServiceName(){
+        //case
+        //Member 추가
+        String signUpEmail1 = "12@gmail.com";
+        String signUpPassword1 = "12345678";
+        memberService.signUp(new MemberRequestDto(signUpEmail1,signUpPassword1));
+        Member member1 = memberRepository.findMemberByEmail(signUpEmail1).get();
+
+        //Membership 추가
+        String serviceName1 = "test1";
+        Membership membership1 = new Membership(serviceName1,"test1");
+        Membership savedMembership1 = membershipRepository.save(membership1);
+
+        //MemberMembershipLink 추가
+        MemberMembershipLink memberMembershipLink1 = new MemberMembershipLink(null,member1,savedMembership1);
+        memberMembershipLinkRepository.save(memberMembershipLink1);
+
+        //when
+        List<MemberSyncResponseDto> allMemberByServiceName = memberService.getAllMemberByServiceName("test2");
+
+        //then
+        assertEquals(0,allMemberByServiceName.size());
     }
 
 }
