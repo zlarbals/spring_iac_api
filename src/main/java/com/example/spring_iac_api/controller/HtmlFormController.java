@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/form")
-public class RegistrationController {
+public class HtmlFormController {
 
     @GetMapping("/signin")
     public String showSignInForm(){
