@@ -23,7 +23,7 @@ public class MemberMembershipLink extends BaseTimeEntity{
     @JoinColumn(name = "MEMBER_SEQ")
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MEMBERSHIP_NAME")
     private Membership membership;
 
