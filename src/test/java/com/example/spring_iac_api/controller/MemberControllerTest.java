@@ -1,23 +1,20 @@
 package com.example.spring_iac_api.controller;
 
-import com.example.spring_iac_api.domain.Membership;
 import com.example.spring_iac_api.dto.MemberRequestDto;
-import com.example.spring_iac_api.repository.MembershipRepository;
 import com.example.spring_iac_api.service.MemberService;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
 import com.example.spring_iac_api.util.jwt.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.NestedServletException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("local")
 class MemberControllerTest {
 
     @Autowired
@@ -39,15 +37,6 @@ class MemberControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private MembershipRepository membershipRepository;
-
-    @BeforeEach
-    void saveAuthKey(){
-        Membership service = new Membership("test","ee4e08b3-9b4a-4577-b891-c1399447d982");
-        membershipRepository.save(service);
-    }
 
     @DisplayName("회원가입 테스트 - 정상 회원가입")
     @Test
@@ -60,7 +49,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signup")
-                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -84,7 +72,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signup")
-                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -105,7 +92,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signup")
-                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -129,7 +115,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signin")
-                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -156,7 +141,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signin")
-                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -181,7 +165,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(post("/member/signin")
-                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(memberRequestDtoToJson))
                 .andDo(print());
@@ -203,7 +186,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/member/refresh")
-                    .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                     .header("Authorization", "Bearer " + refreshToken)
                     .param("email", signUpEmail))
                 .andDo(print());
@@ -225,7 +207,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/member/refresh")
-                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .param("email", signUpEmail))
                 .andDo(print());
 
@@ -245,7 +226,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/member/refresh")
-                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .header("Authorization", refreshToken)
                         .param("email", signUpEmail))
                 .andDo(print());
@@ -266,7 +246,6 @@ class MemberControllerTest {
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/member/refresh")
-                        .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982")
                         .header("Authorization", "Bearer" + refreshToken)
                         .param("email", signUpEmail))
                 .andDo(print());
@@ -274,30 +253,4 @@ class MemberControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest());
     }
-
-    @DisplayName("AuthKey 인터셉터 테스트 - AuthKey header 미입력")
-    @Test
-    public void testAuthKeyInterceptorNoAuthKeyHeader() throws Exception{
-        try {
-            mockMvc.perform(get("/test"));
-        }catch (NestedServletException e){
-            Throwable rootCause = e.getRootCause();
-            assertEquals(PromisedReturnMessage.INVALID_AUTH_KEY, rootCause.getMessage());
-        }
-    }
-
-    @DisplayName("AuthKey 인터셉터 테스트 - 잘못된 AuthKey header 입력")
-    @Test
-    public void testAuthKeyInterceptorInvalidAuthKeyHeader() throws Exception{
-        try {
-            mockMvc.perform(get("/test")
-                    .header("AuthKey","ee4e08b3-9b4a-4577-b891-c1399447d982-INVALID")
-            );
-        }catch (NestedServletException e){
-            Throwable rootCause = e.getRootCause();
-            assertEquals(PromisedReturnMessage.INVALID_AUTH_KEY, rootCause.getMessage());
-        }
-    }
-
-
 }

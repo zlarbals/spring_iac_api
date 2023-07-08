@@ -8,6 +8,7 @@ import com.example.spring_iac_api.repository.MemberMembershipLinkRepository;
 import com.example.spring_iac_api.repository.MemberRepository;
 import com.example.spring_iac_api.repository.MembershipRepository;
 import com.example.spring_iac_api.service.MemberService;
+import com.example.spring_iac_api.util.PromisedReturnMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.NestedServletException;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -121,6 +123,35 @@ class SyncControllerTest {
         //then
         resultActions.andExpect(status().isUnauthorized());
 
+    }
+
+    @DisplayName("AuthKey 인터셉터 테스트 - AuthKey header 미입력")
+    @Test
+    public void testAuthKeyInterceptorNoAuthKeyHeader() throws Exception{
+        try {
+            mockMvc.perform(get("/sync/member"));
+        }catch (NestedServletException e){
+            Throwable rootCause = e.getRootCause();
+            assertEquals(PromisedReturnMessage.INVALID_AUTH_KEY, rootCause.getMessage());
+        }
+    }
+
+    @DisplayName("AuthKey 인터셉터 테스트 - 잘못된 AuthKey header 입력")
+    @Test
+    public void testAuthKeyInterceptorInvalidAuthKeyHeader() throws Exception{
+
+        String serviceName1 = "test1";
+        Membership membership1 = new Membership(serviceName1,"test1");
+        membershipRepository.save(membership1);
+
+        try {
+            mockMvc.perform(get("/sync/member")
+                    .header("AuthKey","test2")
+            );
+        }catch (NestedServletException e){
+            Throwable rootCause = e.getRootCause();
+            assertEquals(PromisedReturnMessage.INVALID_AUTH_KEY, rootCause.getMessage());
+        }
     }
 
 }
