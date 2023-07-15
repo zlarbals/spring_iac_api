@@ -16,11 +16,14 @@ public class MemberSyncResponseDto {
 
     private LocalDate disabledDate;
 
+    private LocalDate joinDate;
+
     public MemberSyncResponseDto(Member member){
         this.seq = member.getSeq();
         this.email = member.getEmail();
         this.useYn = member.getUseYn().name();
         this.disabledDate = member.getDisabledDate();
+        this.joinDate = member.getJoinDate();
     }
 
 }

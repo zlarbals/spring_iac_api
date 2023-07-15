@@ -34,6 +34,9 @@ public class Member extends BaseTimeEntity{
     @Column(name = "DISABLED_DATE")
     private LocalDate disabledDate;
 
+    @Column(name = "JOIN_DATE")
+    private LocalDate joinDate;
+
     @OneToMany(mappedBy = "member")
     private List<MemberMembershipLink> membershipList = new ArrayList<>();
 
