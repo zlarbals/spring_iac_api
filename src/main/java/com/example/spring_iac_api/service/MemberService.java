@@ -29,6 +29,8 @@ public class MemberService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final NotificationService notificationService;
+
     @Transactional
     public MemberResponseDto signUp(MemberRequestDto memberRequestDto) {
 
@@ -42,6 +44,8 @@ public class MemberService {
                 .build();
 
         Member newMember = memberRepository.save(member);
+
+        notificationService.sendSignUpGreetingAlarm(newMember.getEmail());
 
         return new MemberResponseDto(newMember);
     }

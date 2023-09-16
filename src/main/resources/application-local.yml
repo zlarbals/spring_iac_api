@@ -13,6 +13,16 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  mail:
+    host: smtp.naver.com
+    port: 465
+    username: #naver id
+    password: #naver password
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
 
 server:
   port: 8061
