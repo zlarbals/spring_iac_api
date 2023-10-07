@@ -40,4 +40,7 @@ public class Member extends BaseTimeEntity{
     @OneToMany(mappedBy = "member")
     private List<MemberMembershipLink> membershipList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member")
+    private List<MemberBotLink> botList = new ArrayList<>();
+
 }

@@ -66,23 +66,36 @@
 <!-- Add Bootstrap JS (optional if you need any JavaScript features from Bootstrap) -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-<script>
+<script th:inline="javascript">
     function submitForm() {
         var email = document.getElementById("email").value;
         var password = document.getElementById("password").value;
+        var botId = [[${BotId}]];
+        var botUserId = [[${BotUserId}]];
 
         var data = {
             "email": email,
-            "password": password
+            "password": password,
+            "botId": botId,
+            "botUserId": botUserId
         };
 
-        fetch("/member/signin", {
+        var signInUrl = "/bot/signin";
+        if(!botUserId){
+            signInUrl = "/member/signin";
+        }
+
+        fetch(signInUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(data)
         }).then(response => {
+            if(response.redirected){
+                window.location.href = response.url;
+            }
+
             var json = response.json();
             if (response.ok) {
                 return json
