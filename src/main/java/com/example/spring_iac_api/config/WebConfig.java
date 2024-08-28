@@ -3,6 +3,7 @@ package com.example.spring_iac_api.config;
 import com.example.spring_iac_api.interceptor.HeaderAuthKeyInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -15,8 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(headerAuthKeyInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns("/form/**")
-                .excludePathPatterns("/member/**");
+                .excludePathPatterns("/form/**","/member/validate")
+                .addPathPatterns("/**");
     }
 }

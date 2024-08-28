@@ -3,6 +3,7 @@ package com.example.spring_iac_api.controller;
 import com.example.spring_iac_api.dto.MemberResponseDto;
 import com.example.spring_iac_api.dto.ResponseResult;
 import com.example.spring_iac_api.dto.MemberRequestDto;
+import com.example.spring_iac_api.dto.ValidateResponseDto;
 import com.example.spring_iac_api.service.MemberService;
 import com.example.spring_iac_api.util.PromisedReturnMessage;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +36,18 @@ public class MemberController {
         return new ResponseEntity<>(new ResponseResult(HttpStatus.CREATED,memberResponseDto),HttpStatus.CREATED);
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<ResponseResult> signIn(@RequestBody MemberRequestDto memberRequestDto){
-        MemberResponseDto memberResponseDto = memberService.signIn(memberRequestDto);
+    @PostMapping("/validate")
+    public ResponseEntity<ResponseResult> validateAuthentication(@RequestBody MemberRequestDto memberRequestDto){
+        String authToken = memberService.validateAndGenerateAuthToken(memberRequestDto);
+        ValidateResponseDto validateResponseDto = new ValidateResponseDto();
+        validateResponseDto.generateRedirectUrlWithAuthToken(memberRequestDto.getRedirectUrl(),authToken);
+
+        return new ResponseEntity<>(new ResponseResult(HttpStatus.OK,validateResponseDto), HttpStatus.OK);
+    }
+
+    @GetMapping("/info/{token}")
+    public ResponseEntity<ResponseResult> getMemberInfoByToken(@PathVariable String token){
+        MemberResponseDto memberResponseDto = memberService.getAuthenticationInfoByToken(token);
 
         return new ResponseEntity<>(new ResponseResult(HttpStatus.OK,memberResponseDto), HttpStatus.OK);
     }

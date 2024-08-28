@@ -18,8 +18,11 @@ public class JwtTokenProvider {
 
     private final String REFRESH_TOKEN_SECRET_KEY = "c9ba7d53-6880-4cfb-a386-3fabd5b1f040";
 
+    private final String AUTH_TOKEN_SECRET_KEY = "ddfa1f2c-663f-4eef-9a2a-abeefeb882ff";
+
     private final long ACCESS_TOKEN_EXPIRATION_TIME = 1000L * 60 * 15; // 15 minutes
     private final long REFRESH_TOKEN_EXPIRATION_TIME = 1000L * 60 * 60; // 60 minutes
+    private final long AUTH_TOKEN_EXPIRATION_TIME = 1000L * 60 * 5; // 5 minutes
 
     private final TimeProvider timeProvider;
 
@@ -29,6 +32,10 @@ public class JwtTokenProvider {
 
     public JwtTokenProvider(){
         this.timeProvider = new DefaultTimeProvider();
+    }
+
+    public String generateAuthToken(String email){
+        return generateToken(email, AUTH_TOKEN_SECRET_KEY,AUTH_TOKEN_EXPIRATION_TIME);
     }
 
     public String generateAccessToken(String email){
@@ -62,6 +69,18 @@ public class JwtTokenProvider {
         SecretKey secretKey = Keys.hmacShaKeyFor(REFRESH_TOKEN_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
         return validateToken(refreshToken,secretKey);
     }
+
+    public boolean validateAuthToken(String authToken){
+        SecretKey secretKey = Keys.hmacShaKeyFor(AUTH_TOKEN_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        return validateToken(authToken, secretKey);
+    }
+
+    public String extractEmailFromToken(String token){
+        validateAuthToken(token);
+
+        return Jwts.parserBuilder().setSigningKey(AUTH_TOKEN_SECRET_KEY).build().parseClaimsJws(token).getBody().getSubject();
+    }
+
     private boolean validateToken(String token, Key key){
         boolean result = false;
         try {

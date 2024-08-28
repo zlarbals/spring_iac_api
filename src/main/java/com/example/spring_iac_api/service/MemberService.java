@@ -58,6 +58,35 @@ public class MemberService {
 
     }
 
+    public String validateAndGenerateAuthToken(MemberRequestDto memberRequestDto) {
+        Member member = memberRepository.findMemberByEmail(memberRequestDto.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException(PromisedReturnMessage.FAIL_LOGIN));
+
+        if(!passwordEncoder.matches(memberRequestDto.getPassword(), member.getPassword())){
+            throw new IllegalArgumentException(PromisedReturnMessage.FAIL_LOGIN);
+        }
+
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        return jwtTokenProvider.generateAuthToken(member.getEmail());
+    }
+
+    public MemberResponseDto getAuthenticationInfoByToken(String token){
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        String email = jwtTokenProvider.extractEmailFromToken(token);
+
+        Optional<Member> optionalMember = memberRepository.findMemberByEmail(email);
+        if(ObjectUtils.isEmpty(email) || optionalMember.isEmpty()){
+            throw new TokenValidationException(PromisedReturnMessage.TOKEN_NOT_VALIDATION);
+        }
+
+        Member member = optionalMember.get();
+
+        String accessToken= jwtTokenProvider.generateAccessToken(email);
+        String refreshToken= jwtTokenProvider.generateRefreshToken(email);
+
+        return new MemberResponseDto(member,accessToken,refreshToken);
+    }
+
     public MemberResponseDto signIn(MemberRequestDto memberRequestDto) {
         Member member = memberRepository.findMemberByEmail(memberRequestDto.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException(PromisedReturnMessage.FAIL_LOGIN));

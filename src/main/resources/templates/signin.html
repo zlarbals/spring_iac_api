@@ -71,12 +71,17 @@
         var email = document.getElementById("email").value;
         var password = document.getElementById("password").value;
 
+        const currentUrl = window.location.href;
+        const urlParams = new URL(currentUrl).searchParams;
+        const redirectUrl = urlParams.get('redirectUrl');
+
         var data = {
             "email": email,
-            "password": password
+            "password": password,
+            "redirectUrl": redirectUrl
         };
 
-        fetch("/member/signin", {
+        fetch("/member/validate", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -91,8 +96,7 @@
             }
         })
             .then(result => {
-                sessionStorage.setItem('accessToken', result.response.accessToken);
-                sessionStorage.setItem('refreshToken', result.response.refreshToken);
+                window.location.href = result.response.redirectUrl;
             })
             .catch(error => {
                 error.then(errorBody => {
